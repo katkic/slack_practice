@@ -1,9 +1,21 @@
 require 'slack-notify'
+require 'clockwork'
 require 'dotenv'
-
 Dotenv.load
-client = SlackNotify::Client.new(webhook_url: ENV['SLACK_EWBHOOK_URL'])
 
-client.notify("generalへHello There!")
-client.notify("dive-into-codeへrubyプログラムからメッセージを送信", "#dive-into-code")
-client.notify("generalとdive-into-codeにメッセージを送ります", ["#general", "#dive-into-code"])
+module Clockwork
+  client = SlackNotify::Client.new(webhook_url: ENV['SLACK_EWBHOOK_URL'])
+  message = 'Hello There!'
+
+  handler do |job|
+    job.call
+  end
+
+  every(
+    3.minutes,
+    lambda do
+      time = Time.now.to_s
+      client.notify(message + time)
+    end
+  )
+end
